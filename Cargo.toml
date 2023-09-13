@@ -1,0 +1,29 @@
+[package]
+name = "stor"
+authors = ["Michal Hornický <semtexzv@gmail.com>"]
+
+license = "MIT"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["impl-rocks", "format-ordcode", "format-protokit", "format-postcard", "format-json"]
+
+impl-rocks = ["rocksdb"]
+
+format-json = ["serde", "serde_json"]
+format-ordcode = ["ordcode"]
+format-postcard = ["postcard"]
+format-protokit = ["protokit"]
+
+[dependencies]
+zerocopy = "0.6.1"
+
+rocksdb = { version = "0.21.0", optional = true }
+protokit = { git = "https://github.com/semtexzv/protokit", branch = "main", optional = true }
+
+serde = { version = "1.0.164", optional = true }
+serde_json = { version = "1.0.97", optional = true }
+
+ordcode = { version = "0.2.2", optional = true }
+postcard = { version = "1.0.4", features = ["alloc"], optional = true }
