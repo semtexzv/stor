@@ -33,3 +33,13 @@ pub fn register<S: Store>(db: &Tables<S, DB<'static, S>>, mail: &str, name: &str
   }).unwrap()
 }
 ```
+
+### Formats
+- [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) based types,
+- raw slices and strings,
+- protobuf using [protokit](https://github.com/semtexzv/protokit)
+- Serde based [json](https://github.com/serde-rs/json)
+- Serde based [ordcode](https://github.com/pantonov/ordcode)
+- Serde based [postcard](https://github.com/jamesmunns/postcard)
+- No value at all
+- Ignored value
