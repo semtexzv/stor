@@ -1,6 +1,6 @@
 # Stor
-Stor is a library for implementing embedded KV database based on RocksDB. It was originally based on [heed](https://github.com/meilisearch/heed), 
-but has been since fully rewritten from that codebase. It's designed to support multiple backends. Currently only RocksDB backend is implemented. 
+Stor is a library for building embedded databases. It works on underlying transactional KV storage, and provides typed interfaces, and a 
+way to be generic over the underlying storage engine. Currently, a RocksDB backend is implemented. 
 
 The core storage engine of [Blok3](https://blok3.io) is built on multiple `stor`-based databases.
 
@@ -9,37 +9,42 @@ A simple example in which we create database with generic backend, with one tabl
 key and value.
 ```rust
 #[derive(Debug, Default, Clone, PartialEq, Proto)]
-pub struct User {
+pub struct UserData {
   #[field(1, string, singular)]
   pub name: String,
+  #[field(2, bytes, optional)]
+  pub hash: [u8; 32]
 }
 
+/// Container holding all the tables that we're interested in.
 pub struct DB<'s, S: Store> {
-    // Maps email to users
-    pub users: Typed<'s, S, Str, Protokit<User>>
+    /// Users table maps emails to data about individual users
+    pub users: Typed<'s, S, Str, Protokit<UserData>>
 }
-
+/// The `stor::Tables` holds both the storage engine, and the table references
+/// in a safe way (self-referential lifetimes).
 pub fn tables<S: Store>(s: S) -> Arc<stor::Tables<S, DB<'static, S>>> {
-  Ok(Arc::new(Tables::new(s, |store| DB {
-      users: store.typed("users")?,
+  Ok(Arc::new(Tables::new(s, |store, cfg| DB {
+      users: store.typed("users", &cfg)?,
   })?))
 }
-
+/// Using the database requires transactions
 pub fn register<S: Store>(db: &Tables<S, DB<'static, S>>, mail: &str, name: &str) {
   db.store.with_wtx(|wtx| {
     db.users.put(wtx, &mail, &User {
       name: name.to_string(),
+      hash: None,
     })
   }).unwrap()
 }
 ```
 
-### Formats
-- [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) based types,
+### Data formats
+You can select different format for key and value of every table. The built-in ones are:
+
+- [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) based types, and their slices.
 - raw slices and strings,
 - protobuf using [protokit](https://github.com/semtexzv/protokit)
-- Serde based [json](https://github.com/serde-rs/json)
-- Serde based [ordcode](https://github.com/pantonov/ordcode)
-- Serde based [postcard](https://github.com/jamesmunns/postcard)
-- No value at all
-- Ignored value
+- [json](https://github.com/serde-rs/json)
+- [ordcode](https://github.com/pantonov/ordcode) - Useful for fully ordered keys.
+- [postcard](https://github.com/jamesmunns/postcard)
