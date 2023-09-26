@@ -3,7 +3,11 @@ Stor is a library for building embedded databases. It works on underlying transa
 way to be generic over the underlying storage engine. Currently, a RocksDB backend is implemented. 
 
 The core storage engine of [Blok3](https://blok3.io) is built on multiple `stor`-based databases.
-
+### Adding to your project
+Project is still in alpha, if you want to test it out, you must use git dependency. Add this to your `Cargo.toml`'s `[dependencies]` section:
+```toml
+stor = { git = "https://github.com/semtexzv/stor" }
+```
 # Example
 A simple example in which we create database with generic backend, with one table storing `email -> User` mapping with different encoding formats for 
 key and value.
@@ -48,3 +52,6 @@ You can select different format for key and value of every table. The built-in o
 - [json](https://github.com/serde-rs/json)
 - [ordcode](https://github.com/pantonov/ordcode) - Useful for fully ordered keys.
 - [postcard](https://github.com/jamesmunns/postcard)
+
+# Status
+This is very much an alpha level software. Expect some bugs!
